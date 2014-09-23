@@ -3,7 +3,7 @@
 #include <string.h>
 #include <errno.h>
 
-void getCurrDir(char);
+void getCurrDir(char* currentDirectory);
 
 int main(){
 	
@@ -19,35 +19,46 @@ int main(){
   }
 
 	char *currentDirectory = NULL; 
-	//getCurrDir(& currentDirectory); //Need to call free() on this later
-	
-	int InfRun = 0; // 1
-	while (InfRun){
-		fprintf(stdout, currentDirectory);
+	getCurrDir(currentDirectory); //Need to call free() on this later
+	char str[1000];
+	FILE *fp;	
+
+	int InfRun = 1; // 1
+	//while (InfRun){
+		//fprintf(stdout, "\n%s",currentDirectory);
+		//if (fgets(str, 1000, fp) != NULL){
+			//if (str[0] == 'x'){
+				InfRun = 0;
+			//}
+			//puts(str);
+		//}
 		
-	}
+	//}
+	fclose(fp);
 	
   return EXIT_SUCCESS;
 }
 
-void getCurrDir(char currentDirectory){
-	//free(currentDirectory); //open up the pointer, and remove chance for constant mem leak
-	//int notLargeEnough = 1;
-	//int currDirSize = 100;
-	//char *currDir = currentDirectory;
-	//char *currDirErr = NULL;
-	//while (notLargeEnough){
-		//currDirErr = getcwd(currDir, (size_t)currDirSize) ;
-		//if (currDirErr != NULL){
-			////return currDir;
-			//currentDirectory = currDir;
-			//notLargeEnough = 0;
-		//}
-		//else if (errno == ERANGE){
-			//currDirSize += 100;
-		//}
-		//if (currDirSize > 100000){
-			//fprintf(stderr, "Something is going wrong inside getCurrDir()");
+void getCurrDir(char *currentDirectory){
+	currentDirectory = NULL;
+	free(currentDirectory); //open up the pointer, and remove chance for constant mem leak
+	int notLargeEnough = 1;
+	int currDirSize = 100;
+	char *currDir = currentDirectory;
+	char *currDirErr = NULL;
+	while (notLargeEnough){
+		//*currDirErr = getcwd(currDir, (size_t)currDirSize) ;
+		/*if (currDirErr != NULL){
+			//return currDir;
+			currentDirectory = currDir;
+			notLargeEnough = 0;
+		}
+		else if (errno == ERANGE){
+			currDirSize += 100;
+		}
+		if (currDirSize > 100000){
+			fprintf(stderr, "Something is going wrong inside getCurrDir()");
 			//return EXIT_FAILURE;
-		//}
+		}	*/
+	}
 }
