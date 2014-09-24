@@ -14,7 +14,7 @@ int main(){
 		char command[1000]; 
 	};
 	struct pastCommand history[1000]; //billions and billions of stars
-	int histCount = 0;
+	int histCount = -1;
 
 	int envSet;
 	envSet = setenv("MYHOME","/bin:.",0);
@@ -77,15 +77,35 @@ int main(){
 									break;
 								}
 							}
-							if (allNum && strlen(splitStr) <= 5){ //not too many numbers
+							if (allNum && strlen(splitStr) <= 5 && strlen(splitStr) > 2){ //not too many numbers // >2 added to avoid ! counting as !0
 								//not sure why ^ is 5
 								//find number, find command at number, run command
-								int num = atoi(strtok(splitStr, "!"));
+								int num = atoi(strtok(splitStr, "!")); //returns 0 if empty
 								printf("Number is >> %i",num);
 								strncpy(str, history[num].command,1000);
 								splitStr = strtok(str," ");
-							} else { // !+letters  Search for command
-								
+								printf("splt > %s\n",splitStr);
+							} 
+							else { // !+letters  Search for command
+								int same = 0;
+								int y;
+								for (x = 999; x > -1; x--){
+									for (y=0; y < strlen(splitStr)+1; y++){
+										same = 1;
+										if (history[x].command[y] != splitStr[y+1]){
+											same = 0;
+											break;
+										}
+									} // v not working
+									if (same){ //Prefix matched, set splitStr
+										printf("SplitStr > %s\n", splitStr);
+										printf("hist at n> %s\n",history[x].command);
+										strncpy(str, history[x].command, 1000);
+										splitStr = strtok(str, " ");
+										printf("spltStr %s\n",splitStr);
+										break;
+									}
+								}
 							}
 						}
 					}
