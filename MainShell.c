@@ -3,6 +3,7 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
+#include <ctype.h>
 
 //void getCurrDir(char* currentDirectory);
 
@@ -26,7 +27,7 @@ int main(){
   	return EXIT_FAILURE;
   }
 
-	char *currentDirectory = "Heres/ya/fuckin/path"; 
+	char *currentDirectory = "\nHeres/ya/fuckin/path"; 
 	//getCurrDir(currentDirectory); //Need to call free() on this later
 	//printf("hasnt errored yet");
 	char str[1000]; 
@@ -56,9 +57,9 @@ int main(){
 				printf(">>>%s\n",splitStr);
 				///all commands lead from here
 				if (splitStr[0] == '!'){ //bang command
-					printf("BANG");
+					//printf("BANG");
 					if (strlen(splitStr) > 1){ //more than just a !
-						if (splitStr[1] == '!'){//repeat last command
+						if (splitStr[1] == '!'){//repeat last command !!
 							printf("Hist Com > %s\n",history[histCount-1].command);
 							strncpy(str, history[histCount-1].command,1000);//-1 because last command is !!
 							printf("after strncpy %s\n", str);
@@ -71,14 +72,24 @@ int main(){
 							int allNum = 1; //true
 							int x; //start at 1 becasue of !
 							for (x = 1; x < strlen(splitStr); x++){
-								if (isAlpha(splitStr[x])){
-									
+								if (isalpha(splitStr[x])){
+									allNum = 0;
+									break;
 								}
+							}
+							if (allNum && strlen(splitStr) <= 5){ //not too many numbers
+								//not sure why ^ is 5
+								//find number, find command at number, run command
+								int num = atoi(strtok(splitStr, "!"));
+								printf("Number is >> %i",num);
+								strncpy(str, history[num].command,1000);
+								splitStr = strtok(str," ");
+							} else { // !+letters  Search for command
+								
 							}
 						}
 					}
 				}
-
 
 
 
