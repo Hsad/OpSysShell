@@ -40,6 +40,7 @@ int main(){
 		if (fgets(str, 1000, fp) != NULL){  //read in command
 			//printf("Always?");
 			
+
 			splitStr = strtok(str," "); //Spit incomeing command
 			if (splitStr != NULL && strcmp(splitStr,"\n") != 0){ //save history
 				printf("Saving command");
@@ -52,10 +53,15 @@ int main(){
 				printf(">%s",splitStr);
 				InfRun = 0;
 				break;
-			}
+			} 
+			
+
+
 			while (splitStr != NULL){ //parsing loop
 				printf(">>>%s\n",splitStr);
 				///all commands lead from here
+				
+				
 				if (splitStr[0] == '!'){ //bang command
 					//printf("BANG");
 					if (strlen(splitStr) > 1){ //more than just a !
@@ -110,7 +116,13 @@ int main(){
 						}
 					}
 				}
-
+				if (splitStr != NULL && strcmp(splitStr,"history\n") == 0){ //exit
+					//print history
+					int z;
+					for (z=0;z<histCount;z++){
+						printf("%i:%s",history[z].number,history[z].command);
+					}
+				}
 
 
 
