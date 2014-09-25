@@ -10,7 +10,7 @@
 int main(){
 
 	struct pastCommand{
-		int number;
+		int number ;
 		char command[1000]; 
 	};
 	struct pastCommand history[1000]; //billions and billions of stars
@@ -43,36 +43,36 @@ int main(){
 
 			splitStr = strtok(str," "); //Spit incomeing command
 			if (splitStr != NULL && strcmp(splitStr,"\n") != 0){ //save history
-				printf("Saving command");
+				//printf("Saving command");
 				histCount++; //increment
 				if (histCount == 1000) { histCount = 0; }//reset
 				history[histCount].number = histCount; //add com to hist
 				strncpy(	history[histCount].command , str, 1000);
 			}
-			if (splitStr != NULL && strcmp(splitStr,"exit\n") == 0){ //exit
-				printf(">%s",splitStr);
+			if (splitStr != NULL && (strcmp(splitStr,"exit\n") == 0 || strcmp(splitStr,"quit\n"))){ //exit
+				printf("bye");
 				InfRun = 0;
 				break;
 			} 
 			
 
-
+			int dontSplit = 0;
 			while (splitStr != NULL){ //parsing loop
 				printf(">>>%s\n",splitStr);
 				///all commands lead from here
 				
-				
 				if (splitStr[0] == '!'){ //bang command
 					//printf("BANG");
 					if (strlen(splitStr) > 1){ //more than just a !
-						if (splitStr[1] == '!'){//repeat last command !!
-							printf("Hist Com > %s\n",history[histCount-1].command);
+						if (splitStr[1] == '!'){//repeat last command -!!-
+							//printf("Hist Com > %s\n",history[histCount-1].command);
 							strncpy(str, history[histCount-1].command,1000);//-1 because last command is !!
-							printf("after strncpy %s\n", str);
+							//printf("after strncpy %s\n", str);
 							//also set current command to last command
 							strncpy(history[histCount].command, history[histCount-1].command, 1000);
 							//printf("after strncpy %s",
 							splitStr = strtok(str," ");
+							dontSplit = 1;
 						}
 						else {
 							int allNum = 1; //true
@@ -91,24 +91,30 @@ int main(){
 								strncpy(str, history[num].command,1000);
 								splitStr = strtok(str," ");
 								printf("splt > %s\n",splitStr);
+								dontSplit = 1;
 							} 
 							else { // !+letters  Search for command
 								int same = 0;
 								int y;
 								for (x = 999; x > -1; x--){
-									for (y=0; y < strlen(splitStr)+1; y++){
+									for (y=0; y < strlen(splitStr)-2; y++){
+										//printf("splitstr len %i\n",(int)strlen(splitStr));
+										//printf("hist command %s\n",history[x].command);
+										//printf("splitStr     %s\n",splitStr);
 										same = 1;
 										if (history[x].command[y] != splitStr[y+1]){
+											//printf("not Same");
 											same = 0;
 											break;
 										}
 									} // v not working
 									if (same){ //Prefix matched, set splitStr
-										printf("SplitStr > %s\n", splitStr);
-										printf("hist at n> %s\n",history[x].command);
+										//printf("SplitStr > %s\n", splitStr);
+										printf("%i: %s",history[x].number,history[x].command);
 										strncpy(str, history[x].command, 1000);
 										splitStr = strtok(str, " ");
-										printf("spltStr %s\n",splitStr);
+										//printf("spltStr %s\n",splitStr);
+										dontSplit = 1;
 										break;
 									}
 								}
@@ -118,17 +124,25 @@ int main(){
 				}
 				if (splitStr != NULL && strcmp(splitStr,"history\n") == 0){ //exit
 					//print history
-					int z;
+					int z;//,c = histCount;
+					//while (history[z].number != -1){
 					for (z=0;z<histCount;z++){
 						printf("%i:%s",history[z].number,history[z].command);
 					}
 				}
+				//need to search path for command, and run it;
+				//pid stuff too
+
+				
 
 
 
 
 				//printf("Before Strtok%s", splitStr);
-				splitStr = strtok(NULL," ");
+				if (!dontSplit){
+					splitStr = strtok(NULL," ");
+				}
+				dontSplit = 0;
 				//printf("\nafter STRTOK%s", splitStr);
 			}
 		}
