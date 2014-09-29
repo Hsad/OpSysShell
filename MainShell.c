@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 void getCurrDir(char **currentDirectory);
 
@@ -38,8 +39,10 @@ int main(){
 	char *splitStr;
 	FILE *fp = stdin;
 
+	int safety = 1000;
 	int InfRun = 1; // 1
-	while (InfRun){  //InfLoop
+	while (InfRun && safety > 0){  //InfLoop
+		safety--;  //protects from infinate loops in children
 		fprintf(stdout, "%s$ ",currentDirectory);  //print Cur Dir
 		if (fgets(str, 1000, fp) != NULL){  //read in command
 			//printf("Always?");
@@ -150,9 +153,25 @@ int main(){
 					if (childPID == 0) {
 						printf("I'm the child\n"); 
 						printf("My pid is %i\n", getpid());
-						infRun = 0;
+						InfRun = 0;
+						execlp("/bin/ls", "ls", "-l", NULL);
 					}
-					else {printf("I'm the parent\n my pid is %i\n", getpid());}
+					else {
+						printf("I'm the parent\n my pid is %i\n", getpid());
+						int status;
+						pid_t child_pid; 
+						child_pid	= wait(&status);
+						//some error thing
+						printf("Parent: Child %d terminated...", (int)child_pid);
+						if ( WIFSIGNALED(status)){
+							printf("Abnormal\n");
+						} 
+						else if (WIFEXITED (status)){
+							int rc = WEXITSTATUS(status);
+							printf("successfully with exit status %d\n", rc);
+						}
+					}
+					//need to make a list of children PID's and merc them when the parent dies, unless otherwise
 				}
 
 				
