@@ -194,6 +194,31 @@ int main(){
   return EXIT_SUCCESS;
 }
 
+
+int hasPipes(char *inputStr){
+	char *split;
+	split = strtok(inputStr, " ");
+	while (split != NULL){
+		if (strcmp(split,"|") == 0){
+			return 1;
+		}
+		split = strtok(NULL, " ");
+	}
+	return 0;
+}
+//this is not done
+int hasRedirect(char *inputStr){
+	char *split;
+	split = strtok(inputStr, " ");
+	while (split != NULL){
+		if (strcmp(split,"<") == 0){
+			return 1;
+		}
+		split = strtok(NULL, " ");
+	}
+	return 0;
+}
+
 void getCurrDir(char **currentDirectory){
 	
 	free(*currentDirectory); //open up the pointer, and remove chance for constant mem leak
