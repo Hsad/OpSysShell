@@ -4,8 +4,9 @@
 #include <errno.h>
 #include <limits.h>
 #include <ctype.h>
+#include <unistd.h>
 
-//void getCurrDir(char* currentDirectory);
+void getCurrDir(char **currentDirectory);
 
 int main(){
 
@@ -27,10 +28,12 @@ int main(){
   	return EXIT_FAILURE;
   }
 
-	char *currentDirectory = "\nHeres/ya/fuckin/path"; 
-	//getCurrDir(currentDirectory); //Need to call free() on this later
+	char *currentDirectory = "\nHeres/ya/fuckin/path";
+	currentDirectory = NULL; 
+	getCurrDir(&currentDirectory); //Need to call free() on this later
 	//printf("hasnt errored yet");
-	char str[1000]; 
+	char str[1000];
+	char secondStr[1000];
 	char *splitStr;
 	FILE *fp = stdin;
 
@@ -39,7 +42,7 @@ int main(){
 		fprintf(stdout, "%s$ ",currentDirectory);  //print Cur Dir
 		if (fgets(str, 1000, fp) != NULL){  //read in command
 			//printf("Always?");
-			
+			strncpy(secondStr, str, 1000);
 
 			splitStr = strtok(str," "); //Spit incomeing command
 			if (splitStr != NULL && strcmp(splitStr,"\n") != 0){ //save history
@@ -47,10 +50,10 @@ int main(){
 				histCount++; //increment
 				if (histCount == 1000) { histCount = 0; }//reset
 				history[histCount].number = histCount; //add com to hist
-				strncpy(	history[histCount].command , str, 1000);
+				strncpy(	history[histCount].command , secondStr, 1000);
 			}
-			if (splitStr != NULL && (strcmp(splitStr,"exit\n") == 0 || strcmp(splitStr,"quit\n"))){ //exit
-				printf("bye");
+			if (splitStr != NULL && (strcmp(splitStr,"exit\n") == 0 || strcmp(splitStr,"quit\n")== 0)){ //exit
+				printf("bye\n\n");
 				InfRun = 0;
 				break;
 			} 
@@ -58,7 +61,7 @@ int main(){
 
 			int dontSplit = 0;
 			while (splitStr != NULL){ //parsing loop
-				printf(">>>%s\n",splitStr);
+				//printf(">>>%s\n",splitStr);
 				///all commands lead from here
 				
 				if (splitStr[0] == '!'){ //bang command
@@ -148,31 +151,37 @@ int main(){
 		}
 	}
 	if (fp != NULL){fclose(fp); fp = NULL;}
+	free(currentDirectory); //not *currentDirectory becassue of reasons
 	
   return EXIT_SUCCESS;
 }
-/*
-void getCurrDir(char *currentDirectory){
-	currentDirectory = NULL;
-	free(currentDirectory); //open up the pointer, and remove chance for constant mem leak
+
+void getCurrDir(char **currentDirectory){
+	
+	free(*currentDirectory); //open up the pointer, and remove chance for constant mem leak
+	*currentDirectory = NULL;
 	int notLargeEnough = 1;
-	int currDirSize = MAX_PATH+1;
-	char *currDir = currentDirectory;
-	char *currDirErr;
-	currDirErr = NULL;
+	int currDirSize = PATH_MAX+1;
+	char *currDir = malloc(1000);
+	if (currDir == NULL) {fprintf(stderr, "CurrDir is NULL");}
+	//char *currDirErr;
+	//currDirErr = NULL;
 	while (notLargeEnough){
 		//getcwd(currDir, (size_t)currDirSize);
-		fprintf(stderr,"about to segfault");
-		currDir = get_current_dir_name();
-		fprintf(stderr, "past segfault");
-		if (currDirr != NULL){
+		//fprintf(stderr,"about to segfault");
+		//currDirErr = getcwd(currDir, 1000);
+		getcwd(currDir, 1000);
+		//fprintf(stderr, "past segfault");
+		if (currDir != NULL){
 			//return currDir;
-			currentDirectory = currDir;
+			//printf("<><><><><>%s",currDir);
+			*currentDirectory = currDir;
 			notLargeEnough = 0;
+			//printf("CURRENTDIRECTORY%s", *currentDirectory);
 		}
-		printf("%s",currDir);
-		printf("%i\n",errno);
-		printf("%i",ERANGE);
+		//printf("%s",currDir);
+		//printf("%i\n",errno);
+		//printf("%i",ERANGE);
 		if (errno == ERANGE){
 			currDirSize += 100;
 		}
@@ -182,4 +191,4 @@ void getCurrDir(char *currentDirectory){
 			//return EXIT_FAILURE;
 		}	
 	}
-}*/
+}
