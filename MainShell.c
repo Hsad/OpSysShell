@@ -207,14 +207,30 @@ int hasPipes(char *inputStr){
 	return 0;
 }
 //this is not done
-int hasRedirect(char *inputStr){
+int hasRedirect(char *inputStr){ // < = 1, > = 2, >> = 3
 	char *split;
 	split = strtok(inputStr, " ");
 	while (split != NULL){
 		if (strcmp(split,"<") == 0){
 			return 1;
 		}
+		else if (strcmp(split,">") == 0){
+			return 2;
+		}
+		else if (strcmp(split,">>") == 0){
+			return 3;
+		}
 		split = strtok(NULL, " ");
+	}
+	return 0;
+}
+
+int backgroundExec(char *inputStr){
+	int len = (int)strlen(inputStr);
+	if (len > 0){
+		if (input[len-1] == '&'){
+			return 1;
+		}
 	}
 	return 0;
 }
