@@ -34,6 +34,7 @@ int main(){
 	//printf("hasnt errored yet");
 	char str[1000];
 	char secondStr[1000];
+	char thirdStr[1000];
 	char *splitStr;
 	FILE *fp = stdin;
 
@@ -121,6 +122,13 @@ int main(){
 										break;
 									}
 								}
+								if (!same){
+									strncpy(thirdStr, secondStr, 1000); //throw data into third buffer
+									char *tempCharPtr; //temp pointer
+									tempCharPtr = strtok(thirdStr, " !\n"); //cut ' ' and !
+									printf("ERROR: no command with '%s' prefix in history\n", tempCharPtr); //print error
+									splitStr = NULL; //this kills the inner while loop that reads the parts of the command
+								}
 							}
 						}
 					}
@@ -135,6 +143,17 @@ int main(){
 				}
 				//need to search path for command, and run it;
 				//pid stuff too
+				if (splitStr != NULL && strcmp(splitStr, "fork\n") == 0){
+					pid_t childPID;
+					printf("current pid is %i\n", getpid());
+					childPID = fork(); 	
+					if (childPID == 0) {
+						printf("I'm the child\n"); 
+						printf("My pid is %i\n", getpid());
+						infRun = 0;
+					}
+					else {printf("I'm the parent\n my pid is %i\n", getpid());}
+				}
 
 				
 
