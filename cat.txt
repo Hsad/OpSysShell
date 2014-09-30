@@ -1,0 +1,27 @@
+cat.txt
+dog.txt
+history
+asdasf
+!a
+history
+exit
+/home/ubuntu/Documents/shell$ /home/ubuntu/Documents/shell$ /home/ubuntu/Documents/shell$ 0:cat.txt
+1:dog.txt
+/home/ubuntu/Documents/shell$ /home/ubuntu/Documents/shell$ 3: asdasf
+/home/ubuntu/Documents/shell$ 0:cat.txt
+1:dog.txt
+2:history
+3:asdasf
+4:!a
+/home/ubuntu/Documents/shell$ bye
+
+/home/ubuntu/Documents/shell$ /home/ubuntu/Documents/shell$ /home/ubuntu/Documents/shell$ 0:cat.txt
+1:dog.txt
+/home/ubuntu/Documents/shell$ /home/ubuntu/Documents/shell$ 3: asdasf
+/home/ubuntu/Documents/shell$ 0:cat.txt
+1:dog.txt
+2:history
+3:asdasf
+4:!a
+/home/ubuntu/Documents/shell$ bye
+

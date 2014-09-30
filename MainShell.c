@@ -6,8 +6,24 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <sys/stat.h> //open() and something else
+#include <sys/types.h> //for open() apparently
+#include <sys/fcntl.h> //open()
 
 void getCurrDir(char **currentDirectory);
+int backgroundExec(char *inputStr);
+int hasRedirectFile(char *inputStr);
+int hasRedirectRight(char *inputStr);
+int hasRedirectLeft(char *inputStr);
+int hasPipe(char *inputStr);
+
+//yet to fully implment >>, <, >, |, <- but these are close. line 200ish 
+//argument handleing
+// cd
+// lstat also seems to think that everything is a ligitimate command, not enough time to fix that, 
+//probably just a stupid mistake.
+
+//time put in, almost breaching 20 hours, possibly beyond that by now
 
 int main(){
 
@@ -145,34 +161,126 @@ int main(){
 					}
 				}
 				//need to search path for command, and run it;
+				
+
+	//need to split each part of the command into char** array
+	//scan each char* pointer to see if it is a <, >, >>, or |
+	//break down the code into order of operation
+	//
+	//if ending & parent will not wait :Done
+	//see if command is valid, fork :Done
+	//add in arguments
+	//see if given input txt
+	//see if given output
+	//see if given output appending
+	//see if given pipe
+	//set up pipe
+	//fork
+	//look for output, no input
+				
 				//pid stuff too
-				if (splitStr != NULL && strcmp(splitStr, "fork\n") == 0){
+				
+				//mostly test code
+				
+				if (splitStr != NULL ){
+					char commandPtr[1000];
+					int isPipe = 0;
+					//int fileDes[2];
+					strncpy(commandPtr, splitStr, 1000);
 					pid_t childPID;
 					printf("current pid is %i\n", getpid());
 					childPID = fork(); 	
 					if (childPID == 0) {
 						printf("I'm the child\n"); 
 						printf("My pid is %i\n", getpid());
-						InfRun = 0;
-						execlp("/bin/ls", "ls", "-l", NULL);
+						InfRun = 0; //bug prevention
+						//need to check the avalibility of the command in question
+						char * daPath = getenv("MYHOME");
+						char*pathStr = strtok(daPath, ":");
+						char pathTemp[1000];
+						struct stat st;
+						int firstTime = 1;
+						int retVal;
+						while (retVal != 0 && pathStr != NULL){
+							if (firstTime != 1){ //stop strtok from running untill after first pass
+								pathStr = strtok(NULL, ":");
+							}
+							strncpy(pathTemp, pathStr, 1000); //copy possible path
+							strcat(pathTemp, commandPtr);//append command to back of possible path
+
+							//need to look through possibilities in the path
+							retVal = lstat(pathTemp, &st); //check if command is avalible
+							firstTime = 0; 
+						}
+						if (retVal == 0){//comand found, look for extra commands (in out pipe)
+							//pathStr is maintianed, so the correct path to call is still in it
+							//look for redirections and crap
+							//find next command
+							//printf("\n\n\n command found!!!!"); //now look to see if anything comes after
+							//printf("split Str before call to strtok: %s", splitStr);//this doesnt work and is no doubt breaking something else
+							strncpy(splitStr, secondStr, 1000);
+							splitStr = strtok(splitStr," ");
+							if (strcmp(splitStr,commandPtr) == 0  && !isPipe){ //first string and command match, as expected
+								printf("something is wrong, or this is a pipe");
+							}
+							else if (isPipe){
+								while (strcmp(splitStr,"|") == 0){
+									splitStr = strtok(NULL, " ");
+								}
+								splitStr = strtok(NULL, " "); //splitstr is now on the pipe command
+								//need to see if pipe is ligitimate now fffffffuuuuuuuuuuuu
+							}
+							while (splitStr != NULL){
+								splitStr = strtok(NULL, " ");
+								if (strcmp(splitStr, "<") == 0){
+									//open input fd
+									//fileDes[0] = open(/*need path in here*/O_RDONLY);
+								}
+								else if (strcmp(splitStr, ">") == 0){
+									//open output fd
+								}
+								else if (strcmp(splitStr, ">>") == 0){
+									//open output fd at bottom of file
+								}	
+								else if (strcmp(splitStr, "|") == 0){
+									//open pipe, fork pipe, tell fork that it is pipe
+									isPipe = 1;
+								}
+								else {//must be an argument
+									//argArr //the most pirate variable ever
+								}
+							}
+							
+							//printf("split Str after call to strtok: %s", splitStr);
+
+						}
+						else {
+							printf("%s: command not found\n",commandPtr);//command then :command not found
+						}
+						//execlp("/bin/ls", "ls", "-l", NULL);
 					}
 					else {
 						printf("I'm the parent\n my pid is %i\n", getpid());
 						int status;
-						pid_t child_pid; 
-						child_pid	= wait(&status);
-						//some error thing
-						printf("Parent: Child %d terminated...", (int)child_pid);
-						if ( WIFSIGNALED(status)){
-							printf("Abnormal\n");
-						} 
-						else if (WIFEXITED (status)){
-							int rc = WEXITSTATUS(status);
-							printf("successfully with exit status %d\n", rc);
+						//pid_t child_pid; 
+						if (backgroundExec(secondStr) == 0){ //if it is not supposed to run in the background
+							//child_pid	= 
+							wait(&status);
+							//some error thing
+							/*
+							printf("Parent: Child %d terminated...", (int)child_pid);
+							if ( WIFSIGNALED(status)){
+								printf("Abnormal\n");
+							} 
+							else if (WIFEXITED (status)){
+								int rc = WEXITSTATUS(status);
+								printf("successfully with exit status %d\n", rc);
+							} */
 						}
 					}
 					//need to make a list of children PID's and merc them when the parent dies, unless otherwise
 				}
+				
 
 				
 
@@ -195,40 +303,47 @@ int main(){
 }
 
 
-int hasPipes(char *inputStr){
-	char *split;
-	split = strtok(inputStr, " ");
-	while (split != NULL){
-		if (strcmp(split,"|") == 0){
+int hasPipe(char *inputStr){
+	int x;
+	for (x = strlen(inputStr); x >= 0; x--){
+		if (inputStr[x] == '|'){
 			return 1;
 		}
-		split = strtok(NULL, " ");
-	}
-	return 0;
-}
-//this is not done
-int hasRedirect(char *inputStr){ // < = 1, > = 2, >> = 3
-	char *split;
-	split = strtok(inputStr, " ");
-	while (split != NULL){
-		if (strcmp(split,"<") == 0){
-			return 1;
-		}
-		else if (strcmp(split,">") == 0){
-			return 2;
-		}
-		else if (strcmp(split,">>") == 0){
-			return 3;
-		}
-		split = strtok(NULL, " ");
 	}
 	return 0;
 }
 
+int hasRedirectLeft(char *inputStr){ 
+	int x;
+	for (x = strlen(inputStr); x >=0; x--){
+		if (inputStr[x] == '<'){
+			return 1;
+		}
+	}
+	return 0;
+}
+int hasRedirectRight(char *inputStr){ 
+	int x;
+	for (x = strlen(inputStr); x >=0; x--){
+		if (inputStr[x+1] == ' ' && inputStr[x] == '>' && inputStr[x-1] == ' '){
+			return 1;
+		}
+	}
+	return 0;
+}
+int hasRedirectFile(char *inputStr){ 
+	int x;
+	for (x = strlen(inputStr); x > 0; x--){
+		if (inputStr[x] == '>' && inputStr[x-1] == '>'){ //note: nothing is stopping a command ->
+			return 1; // from having >> on the begining or end
+		}
+	}
+	return 0;
+}
 int backgroundExec(char *inputStr){
 	int len = (int)strlen(inputStr);
 	if (len > 0){
-		if (input[len-1] == '&'){
+		if (inputStr[len-1] == '&'){
 			return 1;
 		}
 	}
